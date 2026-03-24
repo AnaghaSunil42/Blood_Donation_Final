@@ -1,0 +1,211 @@
+/* Modern Healthcare Theme - Lifeline */
+:root {
+    --primary-red: #D32F2F;
+    --dark-red: #B71C1C;
+    --light-red: #FFEBEE;
+    --text-dark: #2C3E50;
+    --bg-light: #F8F9FA;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column;
+}
+
+.bg-primary-red {
+    background: linear-gradient(135deg, var(--dark-red) 0%, var(--primary-red) 100%);
+}
+
+.text-primary-red {
+    color: var(--primary-red) !important;
+}
+
+.btn-primary-red {
+    background-color: var(--primary-red);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary-red:hover {
+    background-color: var(--dark-red);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(211, 47, 47, 0.3);
+}
+
+.btn-outline-red {
+    color: var(--primary-red);
+    border-color: var(--primary-red);
+}
+
+.btn-outline-red:hover {
+    background-color: var(--primary-red);
+    color: white;
+}
+
+/* Cards */
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+}
+
+/* Hero Section */
+.hero-section {
+    background: linear-gradient(to right, rgba(255, 235, 238, 0.9), rgba(255, 255, 255, 0.9)), url('https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&q=80') center/cover;
+    padding: 100px 0;
+    border-bottom: 5px solid var(--primary-red);
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--text-dark);
+}
+
+/* Emergency Highlight */
+.emergency-card {
+    border-left: 5px solid var(--primary-red);
+    background-color: var(--light-red);
+}
+
+/* Auth Forms */
+.auth-wrapper {
+    max-width: 500px;
+    margin: 40px auto;
+}
+
+.form-control:focus {
+    border-color: var(--primary-red);
+    box-shadow: 0 0 0 0.25rem rgba(211, 47, 47, 0.25);
+}
+
+/* Chatbot Styles */
+#chat-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 350px;
+    height: 450px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    display: flex;
+    flex-direction: column;
+    z-index: 1000;
+    overflow: hidden;
+    transform: translateY(150%);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+#chat-widget.open {
+    transform: translateY(0);
+}
+
+#chat-header {
+    background: var(--primary-red);
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
+
+#chat-messages {
+    flex-grow: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: #f9f9f9;
+}
+
+.msg-bubble {
+    padding: 10px 15px;
+    border-radius: 15px;
+    max-width: 80%;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.msg-bot {
+    background: #E0E0E0;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+}
+
+.msg-user {
+    background: var(--primary-red);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+
+#chat-input-area {
+    display: flex;
+    padding: 10px;
+    background: white;
+    border-top: 1px solid #ddd;
+}
+
+#chat-input {
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    padding: 8px 15px;
+    flex-grow: 1;
+    margin-right: 10px;
+    outline: none;
+}
+
+#chat-send {
+    background: var(--primary-red);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#chat-send:hover {
+    background: var(--dark-red);
+}
+
+#chat-toggle {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    width: 60px;
+    height: 60px;
+    background: var(--primary-red);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
+    z-index: 999;
+    transition: transform 0.3s ease;
+}
+
+#chat-toggle:hover {
+    transform: scale(1.1);
+}

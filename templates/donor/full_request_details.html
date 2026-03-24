@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="alert alert-success d-flex align-items-center mb-4 shadow-sm border-0" role="alert">
+                <i class="bi bi-check-circle-fill fs-3 me-3"></i>
+                <div>
+                    <h5 class="mb-0 fw-bold">Request Accepted Successfully!</h5>
+                    <div>Thank you! You are now matched with this recipient.</div>
+                </div>
+            </div>
+
+            <div class="card shadow border-0">
+                <div class="card-header bg-white border-bottom-0 pt-4 px-4 text-center">
+                    <h3 class="fw-bold text-dark mb-0">Full Request Details</h3>
+                    <p class="text-muted">Request ID: {{ req.request_id_code }}</p>
+                </div>
+                <div class="card-body p-4 p-md-5">
+                    
+                    <ul class="list-group list-group-flush fs-5">
+                        <li class="list-group-item py-3">
+                            <div class="row">
+                                <div class="col-sm-4 text-muted fw-bold">Patient Name</div>
+                                <div class="col-sm-8">{{ req.patient_name }}</div>
+                            </div>
+                        </li>
+                        <li class="list-group-item py-3">
+                            <div class="row">
+                                <div class="col-sm-4 text-muted fw-bold">Patient Age</div>
+                                <div class="col-sm-8">{{ req.patient_age }}</div>
+                            </div>
+                        </li>
+                        <li class="list-group-item py-3">
+                            <div class="row">
+                                <div class="col-sm-4 text-muted fw-bold">Blood Group</div>
+                                <div class="col-sm-8 text-danger fw-bold">{{ req.blood_group }}</div>
+                            </div>
+                        </li>
+                        <li class="list-group-item py-3">
+                            <div class="row">
+                                <div class="col-sm-4 text-muted fw-bold">Units Needed</div>
+                                <div class="col-sm-8">{{ req.units_needed }} Unit(s)</div>
+                            </div>
+                        </li>
+                        <li class="list-group-item py-3">
+                            <div class="row">
+                                <div class="col-sm-4 text-muted fw-bold">Hospital Location</div>
+                                <div class="col-sm-8 fw-bold text-primary">{{ req.hospital_name }}<br>
+                                <small class="text-muted">Lat: {{ req.latitude }}, Lon: {{ req.longitude }}</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item py-3">
+                            <div class="row">
+                                <div class="col-sm-4 text-muted fw-bold">Contact Person Email</div>
+                                <div class="col-sm-8"><a href="mailto:{{ req.recipient_email }}" class="text-decoration-none">{{ req.recipient_email }}</a></div>
+                            </div>
+                        </li>
+                        <li class="list-group-item py-3">
+                            <div class="row">
+                                <div class="col-sm-4 text-muted fw-bold">Phone Number</div>
+                                <div class="col-sm-8 fs-4"><a href="tel:{{ req.contact_number }}" class="text-decoration-none"><i class="bi bi-telephone-fill me-2"></i>{{ req.contact_number }}</a></div>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <div class="text-center mt-5">
+                        <p class="text-muted">Please reach out to the contact person immediately to coordinate the donation.</p>
+                        <a href="{{ url_for('donor.dashboard') }}" class="btn btn-outline-dark px-4 py-2 mt-2">Return to Dashboard</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

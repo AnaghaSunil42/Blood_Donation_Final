@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold mb-4">Admin Dashboard</h2>
+
+    <ul class="nav nav-pills mb-4 nav-fill custom-nav-pills gap-2">
+        <li class="nav-item">
+            <a class="nav-link bg-light text-dark fw-bold border" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-graph-up me-2"></i>Overview</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link bg-light text-dark fw-bold border" href="{{ url_for('admin.inventory') }}"><i class="bi bi-box-seam me-2"></i>Blood Inventory</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active bg-dark text-white shadow-sm" href="{{ url_for('admin.manage_requests') }}"><i class="bi bi-list-task me-2"></i>Requests Management</a>
+        </li>
+    </ul>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white pt-4 pb-0 border-0">
+            <h5 class="fw-bold text-dark">All Hospital/Recipient Requests</h5>
+            <p class="text-muted small">Update status of requests based on fulfillment.</p>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Date</th>
+                            <th>Hospital Details</th>
+                            <th>Blood Required</th>
+                            <th>Units</th>
+                            <th>Status</th>
+                            <th class="text-center pe-4">Manage Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in requests %}
+                        <tr class="{% if req.emergency_flag and req.status == 'Pending' %}table-danger border-danger{% endif %}">
+                            <td class="ps-4">{{ req.request_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                <div class="fw-bold">{{ req.hospital_name }}</div>
+                                <div class="small text-muted">{{ req.recipient_name }}</div>
+                            </td>
+                            <td>
+                                <h5 class="fw-bold text-danger mb-0">{{ req.blood_group }}</h5>
+                                {% if req.emergency_flag %}
+                                    <span class="badge bg-danger rounded-pill">EMERGENCY</span>
+                                {% endif %}
+                            </td>
+                            <td><span class="fw-bold fs-5">{{ req.units_needed }}</span></td>
+                            <td>
+                                {% if req.status == 'Active' %}
+                                    <span class="badge bg-warning text-dark px-3 py-2 rounded-pill">Active</span>
+                                {% elif req.status == 'Accepted' %}
+                                    <span class="badge bg-info text-dark px-3 py-2 rounded-pill">Accepted</span>
+                                {% elif req.status == 'Donor Confirmed' %}
+                                    <span class="badge bg-info text-dark px-3 py-2 rounded-pill border border-info"><i class="bi bi-person-check-fill me-1"></i>Donor Confirmed</span>
+                                {% elif req.status == 'Completed' or req.status == 'Fulfilled' %}
+                                    <span class="badge bg-success px-3 py-2 rounded-pill">Completed</span>
+                                {% elif req.status == 'Unverified' %}
+                                    <span class="badge bg-danger px-3 py-2 rounded-pill">Unverified</span>
+                                {% elif req.status == 'Expired' %}
+                                    <span class="badge bg-dark text-white px-3 py-2 rounded-pill">Expired</span>
+                                {% else %}
+                                    <span class="badge bg-secondary px-3 py-2 rounded-pill">{{ req.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-center pe-4">
+                                <form method="POST" action="{{ url_for('admin.update_request', req_id=req.id) }}" class="d-flex justify-content-center gap-1">
+                                    <button type="submit" name="status" value="Fulfilled" class="btn btn-sm btn-outline-success" {% if req.status == 'Fulfilled' %}disabled{% endif %} title="Mark Fulfilled"><i class="bi bi-check-lg"></i></button>
+                                    <button type="submit" name="status" value="Active" class="btn btn-sm btn-outline-warning" {% if req.status == 'Active' %}disabled{% endif %} title="Mark Active"><i class="bi bi-hourglass-split"></i></button>
+                                    <button type="submit" name="status" value="Cancelled" class="btn btn-sm btn-outline-secondary" {% if req.status == 'Cancelled' %}disabled{% endif %} title="Cancel Request"><i class="bi bi-x-lg"></i></button>
+                                </form>
+                                {% if req.status == 'Donor Confirmed' %}
+                                <form method="POST" action="{{ url_for('admin.send_confirmation_reminder', req_id=req.id) }}" class="mt-2 text-center">
+                                    <button type="submit" class="btn btn-sm btn-danger shadow-sm"><i class="bi bi-envelope-fill me-1"></i> Send Verification Reminder</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">No requests found in the system.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

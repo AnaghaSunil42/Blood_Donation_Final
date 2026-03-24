@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-body p-5">
+                    <h3 class="fw-bold mb-4 text-center">New Blood Request</h3>
+
+                    {% if target_donor %}
+                    <div class="alert alert-info border-0 shadow-sm mb-4">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        <strong>Direct Request:</strong> Targeting a donor near <strong>{{ target_donor.city }}</strong> (Blood Group: <strong>{{ target_donor.blood_group }}</strong>).
+                    </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('recipient.request_blood') }}">
+                        <input type="hidden" name="target_donor_id" value="{{ target_donor.id if target_donor else '' }}">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Patient Name</label>
+                                <input type="text" name="patient_name" class="form-control" placeholder="John Doe" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">Patient Age</label>
+                                <input type="number" name="patient_age" class="form-control" min="1" max="120" required>
+                            </div>
+
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label fw-bold">Hospital Name</label>
+                                <input type="text" name="hospital_name" class="form-control" placeholder="City General Hospital" required>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label fw-bold">District / City</label>
+                                <input type="text" name="district" class="form-control" placeholder="Thrissur" value="{{ target_donor.city if target_donor else '' }}" required title="This helps us prioritize local donors.">
+                            </div>
+
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label fw-bold">Blood Group Needed</label>
+                                <select name="blood_group" class="form-select form-select-lg border-danger" required>
+                                    <option value="">Select...</option>
+                                    {% for bg in blood_groups %}
+                                    <option value="{{ bg }}" {% if target_donor and target_donor.blood_group == bg %}selected{% endif %}>{{ bg }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label fw-bold">Units Required</label>
+                                <input type="number" name="units_needed" class="form-control form-select-lg" min="1" required>
+                            </div>
+                            
+                            <div class="col-md-6 mt-3">
+                                <label class="form-label fw-bold">Urgency Level</label>
+                                <select name="urgency_level" class="form-select" required>
+                                    <option value="Normal">Normal</option>
+                                    <option value="High" selected>High</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 mt-3">
+                                <label class="form-label fw-bold">Location Source</label>
+                                <div class="input-group mb-2">
+                                    <input type="text" id="locationSearch" class="form-control" placeholder="Search for hospital area (e.g. MG Road, Thrissur)">
+                                    <button type="button" class="btn btn-outline-danger" onclick="searchLocation(document.getElementById('locationSearch').value, 'latitude', 'longitude', 'locStatus')">
+                                        <i class="bi bi-search"></i> Search
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" onclick="getCurrentLocation('latitude', 'longitude', 'locStatus')">
+                                        <i class="bi bi-geo-alt"></i> Use My Location
+                                    </button>
+                                </div>
+                                <div id="locStatus" class="mt-3 small text-muted">No location selected. Please search or use current location.</div>
+
+                                <!-- Hidden Coordinates -->
+                                <input type="hidden" name="latitude" id="latitude" required>
+                                <input type="hidden" name="longitude" id="longitude" required>
+                            </div>
+
+                            <div class="col-12 text-center mt-5">
+                                <div class="form-check form-switch d-inline-block p-4 rounded bg-light-red">
+                                    <input class="form-check-input" type="checkbox" name="emergency_flag" id="emergencySwitch" style="transform: scale(1.5);">
+                                    <label class="form-check-label ms-3 fw-bold text-danger fs-5" for="emergencySwitch">
+                                        Trigger Emergency SANGU ATLAS Match
+                                    </label>
+                                    <div class="text-muted small mt-2">Emergency requests immediately notify top 5 matching donors nearby.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-12 mt-5">
+                                <button type="submit"
+                                    class="btn btn-primary-red w-100 py-3 fw-bold fs-5 shadow-sm">Submit Request <i
+                                        class="bi bi-send ms-2"></i></button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/location-utils.js') }}"></script>
+{% endblock %}

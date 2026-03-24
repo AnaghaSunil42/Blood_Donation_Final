@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-body p-md-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-plus text-primary-red display-4"></i>
+                        <h3 class="fw-bold mt-2">Join as a Donor</h3>
+                        <p class="text-muted">Your donation can save up to 3 lives.</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('auth.register_donor') }}" class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">Full Name</label>
+                            <input type="text" name="name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">Email Address</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">Age</label>
+                            <input type="number" name="age" class="form-control" min="18" max="65" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">Gender</label>
+                            <select name="gender" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">Blood Group</label>
+                            <select name="blood_group" class="form-select border-danger" required>
+                                <option value="">Select...</option>
+                                {% for bg in blood_groups %}
+                                <option value="{{ bg }}">{{ bg }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">Phone Number</label>
+                            <input type="tel" name="phone" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-medium">Password</label>
+                            <input type="password" name="password" class="form-control" required minlength="6">
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-medium">City</label>
+                            <input type="text" name="city" class="form-control" required>
+                        </div>
+                        <div class="col-md-8">
+                        <div class="col-8">
+                            <label class="form-label fw-medium">Full Address (For map matching)</label>
+                            <input type="text" name="address" class="form-control" required>
+                        </div>
+                        
+                        <!-- SANGU ATLAS: Location Entry -->
+                        <div class="col-12 mt-3">
+                            <label class="form-label fw-bold">Location Source</label>
+                            <div class="input-group mb-2">
+                                <input type="text" id="locationSearch" class="form-control" placeholder="Search for your area (e.g. Thrissur, Kerala)">
+                                <button type="button" class="btn btn-outline-danger" onclick="searchLocation(document.getElementById('locationSearch').value, 'latitude', 'longitude', 'locStatus')">
+                                    <i class="bi bi-search"></i> Search
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" onclick="getCurrentLocation('latitude', 'longitude', 'locStatus')">
+                                    <i class="bi bi-geo-alt"></i> Use My Location
+                                </button>
+                            </div>
+                            <div id="locStatus" class="mt-2 small text-muted">No location selected. Use search or current location.</div>
+                            
+                            <!-- Hidden Coordinates -->
+                            <input type="hidden" name="latitude" id="latitude" required>
+                            <input type="hidden" name="longitude" id="longitude" required>
+                            
+                            <small class="form-text text-muted mt-2 d-block">Coordinates are automatically set for emergency compatibility.</small>
+                        </div>
+
+                        <div class="col-12 mt-4">
+                            <button type="submit" class="btn btn-primary-red w-100 py-2 fw-bold fs-5">Register
+                                Now</button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="mb-0 text-muted">Already a donor? <a href="{{ url_for('auth.login_donor') }}"
+                                class="text-primary-red text-decoration-none fw-bold">Login here</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/location-utils.js') }}"></script>
+{% endblock %}

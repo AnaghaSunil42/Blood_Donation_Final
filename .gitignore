@@ -1,0 +1,6 @@
+.env
+__pycache__/
+venv/
+.venv/
+db_init_log.txt
+push_error.txt

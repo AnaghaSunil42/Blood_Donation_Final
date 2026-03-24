@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section text-center text-lg-start">
+    <div class="container py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <h1 class="hero-title mb-4">Give Blood,<br><span class="text-primary-red">Save Lives</span></h1>
+                <p class="lead mb-4 text-muted">Join our centralized platform connecting donors, recipients, and
+                    hospitals. Aligned with SDG 3: Good Health and Well-Being.</p>
+                <div class="d-flex gap-3 justify-content-center justify-content-lg-start mt-4">
+                    <a href="{{ url_for('auth.register_donor') }}"
+                        class="btn btn-primary-red btn-lg px-4 rounded-pill shadow-sm">
+                        <i class="bi bi-heart-fill me-2"></i>Become a Donor
+                    </a>
+                    <a href="{{ url_for('auth.register_recipient') }}"
+                        class="btn btn-outline-red btn-lg px-4 rounded-pill bg-white shadow-sm">
+                        <i class="bi bi-search me-2"></i>Request Blood
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <!-- A placeholder image depicting healthcare/blood donation -->
+                <img src="https://images.unsplash.com/photo-1615461066841-6116e61058f4?auto=format&fit=crop&q=80&w=800"
+                    alt="Blood Donation" class="img-fluid rounded-4 shadow-lg border border-4 border-white">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-white">
+    <div class="container py-4">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">How It Works</h2>
+            <p class="text-muted">A seamless process for everyone</p>
+        </div>
+        <div class="row g-4 text-center">
+            <div class="col-md-4">
+                <div class="card h-100 p-4 border-0 bg-light-red">
+                    <div class="card-body">
+                        <div class="display-4 text-primary-red mb-3">
+                            <i class="bi bi-person-plus"></i>
+                        </div>
+                        <h4 class="fw-bold">Register</h4>
+                        <p class="text-muted">Sign up quickly as a donor or a recipient needing blood.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 p-4 border-0 bg-light-red">
+                    <div class="card-body">
+                        <div class="display-4 text-primary-red mb-3">
+                            <i class="bi bi-geo-alt"></i>
+                        </div>
+                        <h4 class="fw-bold">Connect</h4>
+                        <p class="text-muted">Find nearby matches instantly using our location-based mapping system.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 p-4 border-0 bg-light-red">
+                    <div class="card-body">
+                        <div class="display-4 text-primary-red mb-3">
+                            <i class="bi bi-activity"></i>
+                        </div>
+                        <h4 class="fw-bold">Save Lives</h4>
+                        <p class="text-muted">Respond to emergency requests and fulfill life-saving donations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Emergency / Live Stats Section (Placeholder visual) -->
+<section class="py-5 bg-dark text-white">
+    <div class="container text-center py-4">
+        <h3 class="fw-bold mb-4">Every Drop Counts</h3>
+        <p class="lead mb-5">Our AI-assisted platform ensures rapid matching during emergencies.</p>
+        <div class="row text-center g-4">
+            <div class="col-sm-4">
+                <h1 class="display-4 text-danger fw-bold">100+</h1>
+                <p>Donors Registered</p>
+            </div>
+            <div class="col-sm-4">
+                <h1 class="display-4 text-danger fw-bold">50+</h1>
+                <p>Hospitals Connected</p>
+            </div>
+            <div class="col-sm-4">
+                <h1 class="display-4 text-danger fw-bold">1000+</h1>
+                <p>Lives Saved</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

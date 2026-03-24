@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold mb-4">Admin Dashboard</h2>
+
+    <ul class="nav nav-pills mb-4 nav-fill custom-nav-pills gap-2">
+        <li class="nav-item">
+            <a class="nav-link bg-light text-dark fw-bold border" href="{{ url_for('admin.dashboard') }}"><i class="bi bi-graph-up me-2"></i>Overview</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link active bg-dark text-white shadow-sm" href="{{ url_for('admin.inventory') }}"><i class="bi bi-box-seam me-2"></i>Blood Inventory</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link bg-light text-dark fw-bold border" href="{{ url_for('admin.manage_requests') }}"><i class="bi bi-list-task me-2"></i>Requests Management</a>
+        </li>
+    </ul>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white pt-4 pb-0 border-0">
+            <h5 class="fw-bold text-dark">Update Central Inventory</h5>
+            <p class="text-muted small">Add or remove blood units received from donations or dispatched to hospitals.</p>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table align-middle table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="w-25 text-center">Blood Group</th>
+                            <th class="w-25 text-center">Current Units</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stock in blood_stocks %}
+                        <tr>
+                            <td class="text-center">
+                                <h3 class="text-danger fw-bold mb-0">{{ stock.blood_group }}</h3>
+                            </td>
+                            <td class="text-center">
+                                <h3 class="fw-bold mb-0 {% if stock.units_available == 0 %}text-muted{% endif %}">{{ stock.units_available }}</h3>
+                                <small class="text-muted">Last updated: {{ stock.last_updated.strftime('%Y-%m-%d %H:%M') if stock.last_updated else 'Never' }}</small>
+                            </td>
+                            <td>
+                                <form method="POST" action="{{ url_for('admin.inventory') }}" class="d-flex justify-content-center gap-2">
+                                    <input type="hidden" name="blood_group" value="{{ stock.blood_group }}">
+                                    <input type="number" name="units" class="form-control text-center" style="width: 100px;" value="1" min="1" required>
+                                    <button type="submit" name="action" value="add" class="btn btn-success"><i class="bi bi-plus-lg"></i> Add</button>
+                                    <button type="submit" name="action" value="remove" class="btn btn-danger" {% if stock.units_available == 0 %}disabled{% endif %}><i class="bi bi-dash-lg"></i> Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

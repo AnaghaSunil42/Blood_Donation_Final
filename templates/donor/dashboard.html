@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">Donor Dashboard</h2>
+        <a href="{{ url_for('donor.profile') }}" class="btn btn-outline-dark"><i
+                class="bi bi-person-lines-fill me-2"></i>My Profile</a>
+    </div>
+
+    <!-- SANGU ATLAS: Donor Statistics -->
+    {% if not user.is_eligible %}
+    <div class="alert alert-warning border-0 shadow-sm mb-4">
+        <div class="d-flex align-items-center">
+            <i class="bi bi-calendar-x fs-3 me-3 text-danger"></i>
+            <div>
+                <h6 class="mb-0 fw-bold">Donation Lock Active</h6>
+                <p class="mb-2">You are currently not eligible to donate blood. Your next eligible donation date is: <strong>{{ user.next_eligible_date.strftime('%b %d, %Y') if user.next_eligible_date else 'Pending' }}</strong></p>
+                <div id="cooldownTimer" class="h4 fw-bold text-danger mb-0">
+                    <!-- JS Countdown will appear here -->
+                    <span class="spinner-border spinner-border-sm" role="status"></span> Calculating...
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-danger border-4 h-100">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase fw-bold mb-2">Reliability Score</h6>
+                    <h2 class="text-success fw-bold">{{ user.reliability_score or 100 }}%</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-danger border-4 h-100">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase fw-bold mb-2">Total Donations</h6>
+                    <h2 class="text-danger fw-bold">{{ user.total_donations or 0 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-danger border-4 h-100">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase fw-bold mb-2">Lives Impacted</h6>
+                    <h2 class="text-primary fw-bold">{{ user.lives_impacted or 0 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 border-start border-danger border-4 h-100">
+                <div class="card-body text-center">
+                    <h6 class="text-muted text-uppercase fw-bold mb-2">Next Eligible Date</h6>
+                    {% if user.is_eligible %}
+                        <h4 class="text-success fw-bold pt-1">Eligible Now</h4>
+                    {% else %}
+                        <h4 class="text-danger fw-bold pt-1">{{ user.next_eligible_date.strftime('%b %d, %Y') if user.next_eligible_date else 'N/A' }}</h4>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SANGU ATLAS: Search by Request ID -->
+    <div class="card shadow-sm border-0 mb-5 bg-light-red">
+        <div class="card-body p-4 text-center">
+            <h4 class="fw-bold text-danger"><i class="bi bi-search"></i> Search Emergency Request</h4>
+            <p class="text-muted">Enter the <strong>Request ID (BLD-XXXXXX)</strong> you received via email to view details and accept.</p>
+            <form method="POST" action="{{ url_for('donor.search_request') }}" class="d-flex justify-content-center mt-3 mx-auto" style="max-width: 500px;">
+                <input type="text" name="request_id_code" class="form-control form-control-lg me-2 border-danger" placeholder="e.g. BLD-A1B2C3" required>
+                <button type="submit" class="btn btn-danger btn-lg text-white">Search</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Active Blood Requests -->
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+            <h5 class="fw-bold text-primary-red"><i class="bi bi-bell-fill me-2"></i>Urgent Requests for {{
+                user.blood_group }}</h5>
+        </div>
+        <div class="card-body">
+            {% if requests %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Hospital / Patient</th>
+                            <th>Location</th>
+                            <th>Units Needed</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in requests %}
+                        <tr class="{% if req.emergency_flag %}table-danger{% endif %}">
+                            <td>{{ req.request_date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                <div class="fw-bold">{{ req.hospital_name }}</div>
+                                <small class="text-muted">For: {{ req.recipient_name }}</small>
+                                {% if req.emergency_flag %}
+                                <span class="badge bg-danger ms-2">EMERGENCY</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ req.location }}</td>
+                            <td>{{ req.units_needed }}</td>
+                            <td>
+                                <div class="d-flex gap-2">
+                                    <form method="POST" action="{{ url_for('donor.search_request') }}">
+                                        <input type="hidden" name="request_id_code" value="{{ req.request_id_code }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-eye"></i> View Details</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-4 text-muted">
+                <i class="bi bi-check-circle display-4 text-success mb-3 d-block"></i>
+                <p>No pending requests matching your blood group at the moment.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Personal History -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+            <h5 class="fw-bold text-dark"><i class="bi bi-clock-history me-2"></i>My Responses</h5>
+        </div>
+        <div class="card-body">
+            {% if history %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th>Responded On</th>
+                            <th>Hospital</th>
+                            <th>My Response</th>
+                            <th>Request Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for h in history %}
+                        <tr>
+                            <td>{{ h.response_date.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ h.hospital_name }}</td>
+                            <td>
+                                {% if h.response == 'Accepted' %}
+                                <span class="badge bg-success">Accepted</span>
+                                {% else %}
+                                <span class="badge bg-danger">Declined</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if h.request_status == 'Active' %}
+                                <span class="badge bg-warning text-dark">Active</span>
+                                {% elif h.request_status == 'Accepted' %}
+                                <span class="badge bg-info text-dark mb-2">Accepted</span>
+                                    {% if h.response == 'Accepted' %}
+                                    <form method="POST" action="{{ url_for('donor.mark_donated', request_id=h.request_id) }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-success border-2 fw-bold shadow-sm" onclick="return confirm('Confirm you have successfully donated blood?');" {% if not user.is_eligible %}disabled{% endif %}><i class="bi bi-check-circle me-1"></i>I Have Donated</button>
+                                    </form>
+                                    {% endif %}
+                                {% elif h.request_status == 'Donor Confirmed' %}
+                                <span class="badge bg-info text-dark">Awaiting receiver confirmation (30m)</span>
+                                <small class="d-block text-muted mt-1" style="font-size:0.75rem;">Waiting on recipient to verify</small>
+                                {% elif h.request_status == 'Completed' or h.request_status == 'Fulfilled' %}
+                                <span class="badge bg-success">Verified Success</span>
+                                {% elif h.request_status == 'Unverified' %}
+                                <span class="badge bg-danger">Unverified Attempt</span>
+                                {% elif h.request_status == 'Expired' %}
+                                <span class="badge bg-dark">Expired</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ h.request_status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center py-3">No donation history recorded yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // nextDateStr is ISO format (e.g., 2026-07-09T15:30:00)
+        const nextDateStr = "{{ user.next_eligible_date_iso }}";
+        if (!nextDateStr || nextDateStr === 'None' || nextDateStr === '') return;
+
+        const nextDate = new Date(nextDateStr).getTime();
+        const timerElement = document.getElementById('cooldownTimer');
+
+        const x = setInterval(function() {
+            const now = new Date().getTime();
+            const distance = nextDate - now;
+
+            if (distance < 0) {
+                clearInterval(x);
+                timerElement.className = "h4 fw-bold text-success mb-0";
+                timerElement.innerHTML = "<i class='bi bi-check-circle-fill me-2'></i>Eligible to donate now!";
+                return;
+            }
+
+            // Calculations for days, hours, minutes and seconds
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            // Breakdown into approx months and days for the "3 months 15 days" feel
+            const months = Math.floor(days / 30);
+            const remainingDays = days % 30;
+
+            let timerText = "";
+            if (months > 0) timerText += months + "m ";
+            if (remainingDays > 0 || months > 0) timerText += remainingDays + "d ";
+            timerText += hours.toString().padStart(2, '0') + "h " + 
+                         minutes.toString().padStart(2, '0') + "m " + 
+                         seconds.toString().padStart(2, '0') + "s";
+
+            timerElement.innerHTML = "<i class='bi bi-hourglass-split me-2'></i>Next donation in: " + timerText;
+        }, 1000);
+    });
+</script>
+{% endblock %}

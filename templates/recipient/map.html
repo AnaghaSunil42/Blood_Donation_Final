@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block content %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold"><i class="bi bi-geo-alt-fill text-danger me-2"></i>Find Local Donors (Privacy Map)</h2>
+        <a href="{{ url_for('recipient.dashboard') }}" class="btn btn-outline-dark">Back to Dashboard</a>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form method="GET" action="{{ url_for('recipient.find_donors_map') }}" class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold text-muted">Filter by Blood Group</label>
+                    <select name="blood_group" class="form-select border-danger">
+                        <option value="">All Groups</option>
+                        {% for bg in blood_groups %}
+                        <option value="{{ bg }}" {% if bg==selected_bg %}selected{% endif %}>{{ bg }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label fw-bold text-muted">Search Your Location</label>
+                    <div class="input-group">
+                        <input type="text" id="locationSearch" class="form-control" placeholder="City, Area or 'Thrissur'">
+                        <button type="button" class="btn btn-outline-danger" onclick="searchLocation(document.getElementById('locationSearch').value, 'manualLat', 'manualLon', 'locStatus')">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="getCurrentLocation('manualLat', 'manualLon', 'locStatus')">
+                            <i class="bi bi-geo-alt"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-2 d-none">
+                    <!-- Hidden Coordinates -->
+                    <input type="hidden" name="lat" id="manualLat" value="{{ request.args.get('lat', '') }}">
+                    <input type="hidden" name="lon" id="manualLon" value="{{ request.args.get('lon', '') }}">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary-red w-100"><i class="bi bi-filter"></i> Apply Filter</button>
+                </div>
+            </form>
+            <div id="locStatus" class="mt-2 small text-muted">
+                {% if request.args.get('lat') %}
+                <span class="text-success p-1 bg-light rounded"><i class="bi bi-geo-alt-fill"></i> Location set. Apply filter to update map.</span>
+                {% else %}
+                Search or use current location to show distances to nearby donors.
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 overflow-hidden">
+        <div id="map" style="height: 600px; width: 100%; border-radius: 0 0 12px 12px; z-index: 1;"></div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/location-utils.js') }}"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    const donors = [
+        {% for donor in donors %}
+        {
+            id: "{{ donor.id }}",
+            name: "Donor ({{ donor.blood_group }})",
+            blood_group: "{{ donor.blood_group }}",
+            lat: {% if donor.latitude %}{{ donor.latitude }}{% else %}null{% endif %},
+            lon: {% if donor.longitude %}{{ donor.longitude }}{% else %}null{% endif %}
+        }{% if not loop.last %},{% endif %}
+        {% endfor %}
+    ];
+
+    let map = L.map('map').setView([20.5937, 78.9629], 5);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
+    }).addTo(map);
+
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371; // km
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+            Math.sin(dLon/2) * Math.sin(dLon/2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        return R * c;
+    }
+
+    function renderDonors(userLat, userLon) {
+        let bounds = [];
+        if(userLat && userLon) {
+            L.marker([userLat, userLon]).addTo(map).bindPopup("<b>You are here</b>").openPopup();
+            bounds.push([userLat, userLon]);
+        }
+
+        donors.forEach(d => {
+            if(d.lat !== null && d.lon !== null && d.lat !== "None" && d.lon !== "None") {
+                let color = "#f39c12"; // default orange
+                let distMsg = "";
+                let dist = null;
+
+                if (userLat && userLon) {
+                    dist = calculateDistance(userLat, userLon, parseFloat(d.lat), parseFloat(d.lon));
+                    let label = "";
+                    if (dist < 5) {
+                        color = "#2ecc71"; // green
+                        label = "Near";
+                    } else if (dist <= 15) {
+                        color = "#f1c40f"; // yellow
+                        label = "Moderate";
+                    } else {
+                        color = "#e74c3c"; // red
+                        label = "Far";
+                    }
+                    distMsg = "<br><b>" + label + "</b> (Approx " + dist.toFixed(1) + " km)";
+                }
+
+                let requestBtn = "<div class='mt-2'><a href='/recipient/request-blood?target_donor_id=" + d.id + "' class='btn btn-sm btn-primary-red w-100 text-white shadow-sm'><i class='bi bi-send-fill'></i> Request Blood</a></div>";
+
+                L.circle([parseFloat(d.lat), parseFloat(d.lon)], {
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.5,
+                    radius: 1000 // 1 km radius privacy circle
+                }).addTo(map)
+                .bindPopup("<b>" + d.name + "</b>" + distMsg + "<br><i>Exact location hidden for privacy. Near to this area.</i>" + requestBtn);
+                
+                bounds.push([parseFloat(d.lat), parseFloat(d.lon)]);
+            }
+        });
+
+        if(bounds.length > 0) {
+            map.fitBounds(bounds, {padding: [50, 50]});
+        }
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const uLat = parseFloat(urlParams.get('lat'));
+    const uLon = parseFloat(urlParams.get('lon'));
+    
+    if (!isNaN(uLat) && !isNaN(uLon)) {
+        document.getElementById('locStatus').innerText = "Map centered around manually entered location.";
+        renderDonors(uLat, uLon);
+    } else {
+        document.getElementById('locStatus').innerText = "Please manually enter your coordinates to calculate distances.";
+        renderDonors(null, null);
+    }
+</script>
+{% endblock %}

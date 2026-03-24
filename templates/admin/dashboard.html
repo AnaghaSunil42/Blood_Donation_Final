@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold mb-4">Admin Dashboard</h2>
+
+    <!-- Top Navigation for Admin -->
+    <ul class="nav nav-pills mb-4 nav-fill custom-nav-pills gap-2">
+        <li class="nav-item">
+            <a class="nav-link active bg-dark text-white shadow-sm" href="{{ url_for('admin.dashboard') }}"><i
+                    class="bi bi-graph-up me-2"></i>Overview</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link bg-light text-dark fw-bold border" href="{{ url_for('admin.inventory') }}"><i
+                    class="bi bi-box-seam me-2"></i>Blood Inventory</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link bg-light text-dark fw-bold border" href="{{ url_for('admin.manage_requests') }}"><i
+                    class="bi bi-list-task me-2"></i>Requests Management</a>
+        </li>
+    </ul>
+
+    <!-- Quick Stats Cards Row 1 -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 border-start border-4 border-danger h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase fw-bold mb-2">Total Donors</h6>
+                    <h2 class="fw-bold text-dark display-6 mb-0">{{ total_donors }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 border-start border-4 border-primary h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase fw-bold mb-2">Total Recipients</h6>
+                    <h2 class="fw-bold text-dark display-6 mb-0">{{ total_recipients }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 border-start border-4 border-success h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase fw-bold mb-2">Avg Reliability</h6>
+                    <h2 class="fw-bold text-dark display-6 mb-0">{{ avg_reliability }}%</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-danger text-white shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-white-50 text-uppercase fw-bold mb-2">Emergencies</h6>
+                    <h2 class="fw-bold text-white display-6 mb-0">{{ emergency_requests }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats Cards Row 2 (New Features) -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card bg-success text-white shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-white-50 text-uppercase fw-bold mb-2">Verified Success</h6>
+                    <h2 class="fw-bold text-white display-6 mb-0">{{ completed_donations }}</h2>
+                    <small>Life-saving events confirmed</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase fw-bold mb-2">Unverified Attempts</h6>
+                    <h2 class="fw-bold text-dark display-6 mb-0">{{ unverified_donations }}</h2>
+                    <small class="text-danger fw-bold">Fraud risk cases</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-dark shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase fw-bold mb-2">Pending Verify</h6>
+                    <h2 class="fw-bold text-dark display-6 mb-0">{{ pending_confirmations }}</h2>
+                    <small>In 30m window</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-white shadow-sm border-0 border-start border-4 border-info h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase fw-bold mb-2">Blood Units</h6>
+                    <h2 class="fw-bold text-dark display-6 mb-0">{{ total_blood_units }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts and Tables -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white pt-4 pb-0 border-0">
+                    <h5 class="fw-bold text-dark">Blood Inventory Distribution</h5>
+                </div>
+                <div class="card-body d-flex justify-content-center">
+                    <canvas id="inventoryChart" style="max-height: 350px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white pt-4 pb-2 border-0 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold text-dark mb-0">Recent Pending Requests</h5>
+                    <a href="{{ url_for('admin.manage_requests') }}" class="btn btn-sm btn-outline-dark">View All</a>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Recipient</th>
+                                    <th>Blood</th>
+                                    <th>Units</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in recent_requests %}
+                                <tr class="{% if req.emergency_flag %}table-danger{% endif %}">
+                                    <td class="ps-4">
+                                        <div class="fw-bold">{{ req.hospital_name }}</div>
+                                        <div class="small text-muted">{{ req.recipient_name }}</div>
+                                    </td>
+                                    <td class="fw-bold text-danger">{{ req.blood_group }}</td>
+                                    <td>{{ req.units_needed }}</td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-4 text-muted">No pending requests right now.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const ctx = document.getElementById('inventoryChart').getContext('2d');
+        const data = {
+            labels: [{% for item in inventory_data %}'{{ item.blood_group }}'{% if not loop.last %}, {% endif %} {% endfor %}],
+        data: [{% for item in inventory_data %}{{ item.units_available }}{% if not loop.last %}, {% endif %} {% endfor %}],
+    backgroundColor: [
+        'rgba(211, 47, 47, 0.8)',
+        'rgba(25, 118, 210, 0.8)',
+        'rgba(56, 142, 60, 0.8)',
+        'rgba(245, 124, 0, 0.8)',
+        'rgba(123, 31, 162, 0.8)',
+        'rgba(0, 151, 167, 0.8)',
+        'rgba(255, 193, 7, 0.8)',
+        'rgba(93, 64, 55, 0.8)'
+    ],
+        borderWidth: 1
+            }]
+        };
+
+    const config = {
+        type: 'bar',
+        data: data,
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    };
+
+    new Chart(ctx, config);
+    });
+</script>
+{% endblock %}

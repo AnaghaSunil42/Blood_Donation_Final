@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow border-0">
+                <div class="card-header bg-danger text-white p-4">
+                    <h4 class="mb-0"><i class="bi bi-shield-lock-fill me-2"></i>Secure Request Details</h4>
+                    <small>Request ID: {{ req.request_id_code }}</small>
+                </div>
+                <div class="card-body p-5">
+                    
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <h6 class="text-muted text-uppercase fw-bold">Blood Group Requested</h6>
+                            <h2 class="text-danger fw-bold">{{ req.blood_group }}</h2>
+                        </div>
+                        <div class="col-6">
+                            <h6 class="text-muted text-uppercase fw-bold">Urgency Level</h6>
+                            {% if req.urgency_level == 'Critical' %}
+                                <h3 class="text-danger fw-bold"><i class="bi bi-exclamation-triangle-fill"></i> CRITICAL</h3>
+                            {% else %}
+                                <h3 class="text-warning fw-bold">{{ req.urgency_level }}</h3>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-muted text-uppercase fw-bold">Approximate Location</h6>
+                        <p class="fs-5">{{ req.hospital_name }}</p>
+                    </div>
+
+                    <div class="alert alert-warning mb-5 border-warning">
+                        <i class="bi bi-info-circle-fill me-2"></i> <strong>Privacy Protected:</strong> Exact location, patient name, and contact details are hidden until you accept this request.
+                    </div>
+
+                    <h5 class="fw-bold mb-3 border-bottom pb-2 text-dark">Micro-Commitment check before Accepting:</h5>
+                    <form method="POST" action="{{ url_for('donor.commit_request', request_id=req.id) }}">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" name="reach_within_30" value="yes" id="reach30">
+                            <label class="form-check-label fs-5" for="reach30">
+                                I can reach the location within 30 minutes.
+                            </label>
+                        </div>
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" name="available_today" value="yes" id="availToday" required>
+                            <label class="form-check-label fs-5" for="availToday">
+                                I am available to donate today. <span class="text-danger">*</span>
+                            </label>
+                        </div>
+                        
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-danger btn-lg rounded-pill fw-bold fs-5 shadow-sm">
+                                <i class="bi bi-heart-fill me-2"></i> Accept & Reveal Details
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
